@@ -9,6 +9,7 @@ import { Point } from "ol/geom";
 import VectorLayer from "ol/layer/Vector";
 import VectorSource from "ol/source/Vector";
 import { Icon, Style } from "ol/style";
+import { message } from "antd";
 
 import successMarker from "../assets/successMarker.png";
 import locationMarker from "../assets/locationMarker.png";
@@ -20,15 +21,16 @@ const MapView = ({ reports = [], onMapClick }) => {
   const [mapObj, setMapObj] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const clickMarkerSource = useRef(new VectorSource());
-  const tooltipRef = useRef();
 
   useEffect(() => {
     const reportSource = new VectorSource();
+
     reports.forEach((r) => {
       const feature = new Feature({
         geometry: new Point(fromLonLat([r.lng, r.lat])),
         reportData: r,
       });
+
       feature.setStyle(
         new Style({
           image: new Icon({
@@ -38,10 +40,11 @@ const MapView = ({ reports = [], onMapClick }) => {
                 : r.status === "Pending"
                 ? locationMarker
                 : locationMarkerOrange,
-            scale: 0.05,
+            scale: 0.06,
           }),
         })
       );
+
       reportSource.addFeature(feature);
     });
 
@@ -50,17 +53,15 @@ const MapView = ({ reports = [], onMapClick }) => {
       source: clickMarkerSource.current,
     });
 
+    // Simple Tooltip
     const tooltip = document.createElement("div");
-    tooltip.className = "tooltip";
     tooltip.style.position = "absolute";
-    tooltip.style.backgroundColor = "rgba(0,0,0,0.7)";
+    tooltip.style.background = "#2d6a4f";
     tooltip.style.color = "#fff";
-    tooltip.style.padding = "5px 10px";
-    tooltip.style.borderRadius = "4px";
-    tooltip.style.whiteSpace = "nowrap";
-    tooltip.style.pointerEvents = "none";
-    tooltip.style.display = "none"; // hidden initially
-    tooltipRef.current = tooltip;
+    tooltip.style.padding = "6px 10px";
+    tooltip.style.borderRadius = "6px";
+    tooltip.style.fontSize = "12px";
+    tooltip.style.display = "none";
 
     const overlay = new Overlay({
       element: tooltip,
@@ -84,12 +85,17 @@ const MapView = ({ reports = [], onMapClick }) => {
 
     map.on("pointermove", (evt) => {
       const feature = map.forEachFeatureAtPixel(evt.pixel, (f) => f);
+
       if (feature && feature.get("reportData")) {
         const report = feature.get("reportData");
+
         tooltip.innerHTML = `
-          <strong>Status:</strong> ${report.status}<br/><br/>
-          <strong>Time:</strong> ${new Date(report.timestamp).toLocaleString()}
+          <strong>Status:</strong> ${report.status}<br/>
+          <strong>Time:</strong> ${new Date(
+            report.timestamp
+          ).toLocaleString()}
         `;
+
         overlay.setPosition(evt.coordinate);
         tooltip.style.display = "block";
       } else {
@@ -109,15 +115,18 @@ const MapView = ({ reports = [], onMapClick }) => {
 
     mapObj.on("click", (event) => {
       const [lon, lat] = toLonLat(event.coordinate);
+
       clickMarkerSource.current.clear();
+
       const feature = new Feature({
         geometry: new Point(fromLonLat([lon, lat])),
       });
+
       feature.setStyle(
         new Style({
           image: new Icon({
             src: selectedLocationMarker,
-            scale: 0.06,
+            scale: 0.07,
           }),
         })
       );
@@ -132,59 +141,73 @@ const MapView = ({ reports = [], onMapClick }) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        searchQuery
-      )}`
-    );
-    const results = await response.json();
-    if (results.length > 0) {
-      const { lon, lat } = results[0];
-      const coords = fromLonLat([parseFloat(lon), parseFloat(lat)]);
-      mapObj.getView().animate({ center: coords, zoom: 14, duration: 1000 });
-
-      clickMarkerSource.current.clear();
-      const feature = new Feature({
-        geometry: new Point(coords),
-      });
-      feature.setStyle(
-        new Style({
-          image: new Icon({
-            src: selectedLocationMarker,
-            scale: 0.06,
-          }),
-        })
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery
+        )}`
       );
-      clickMarkerSource.current.addFeature(feature);
-    } else {
-      alert("Location not found!");
+
+      const results = await response.json();
+
+      if (results.length > 0) {
+        const { lon, lat } = results[0];
+        const coords = fromLonLat([parseFloat(lon), parseFloat(lat)]);
+
+        mapObj.getView().animate({
+          center: coords,
+          zoom: 14,
+          duration: 800,
+        });
+
+        clickMarkerSource.current.clear();
+
+        const feature = new Feature({
+          geometry: new Point(coords),
+        });
+
+        feature.setStyle(
+          new Style({
+            image: new Icon({
+              src: selectedLocationMarker,
+              scale: 0.07,
+            }),
+          })
+        );
+
+        clickMarkerSource.current.addFeature(feature);
+      } else {
+        message.error("Location not found!");
+      }
+    } catch (error) {
+      message.error("Search failed!");
     }
   };
 
   return (
     <div style={{ width: "100%", textAlign: "center" }}>
-      <form onSubmit={handleSearch} style={{ margin: "10px auto" }}>
+      {/* Search Bar */}
+      <form onSubmit={handleSearch} style={{ margin: "15px auto" }}>
         <input
           type="text"
-          placeholder="Search location"
+          placeholder="Search location..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
-            width: "30%",
+            width: "250px",
             padding: "8px",
-            borderRadius: "8px",
+            borderRadius: "6px",
             border: "1px solid #ccc",
-            outline: "none",
+            marginRight: "8px",
           }}
         />
         <button
           type="submit"
           style={{
-            marginLeft: "10px",
-            padding: "8px 14px",
+            padding: "8px 15px",
+            borderRadius: "6px",
             border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#1677ff",
+            backgroundColor: "#2d6a4f",
             color: "#fff",
             cursor: "pointer",
           }}
@@ -193,9 +216,16 @@ const MapView = ({ reports = [], onMapClick }) => {
         </button>
       </form>
 
+      {/* Map */}
       <div
         ref={mapRef}
-        style={{ width: "100%", height: "75vh", borderRadius: "10px" }}
+        style={{
+          width: "100%",
+          height: "70vh",
+          borderRadius: "12px",
+          overflow: "hidden",
+          boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+        }}
       />
     </div>
   );
