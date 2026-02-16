@@ -1,77 +1,68 @@
-import { Card } from "antd";
 import React from "react";
 
 const AdminDashboard = ({ reports, onUpdate }) => {
-  console.log("reports", reports);
   return (
-    <Card title={"Admin View"} style={{ height: "80vh", overflow: "scroll" }}>
-      <div
-        style={{
-          textAlign: "left",
+    <div style={{ padding: "10px" }}>
+      <h3 style={{ marginBottom: "15px", color: "#1b4332" }}>
+        Admin View
+      </h3>
 
-          padding: "20px",
-          textWrap: "wrap",
-          boxSizing: "border-box",
-        }}
-      >
-        {reports.map((r, i) => (
-          <div
-            key={i}
+      {reports.length === 0 && (
+        <p style={{ color: "#888" }}>No reports submitted yet.</p>
+      )}
+
+      {reports.map((r, i) => (
+        <div
+          key={i}
+          style={{
+            border: "1px solid #e0e0e0",
+            borderRadius: "12px",
+            padding: "12px",
+            marginBottom: "12px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.05)",
+            background: "#fff",
+            width: "100%",
+            boxSizing: "border-box",
+          }}
+        >
+          <p style={{ margin: "4px 0" }}>
+            <b>Name:</b> {r.name}
+          </p>
+
+          <p style={{ margin: "4px 0", wordBreak: "break-word" }}>
+            <b>{r.issueType}:</b> {r.description}
+          </p>
+
+          <p style={{ margin: "6px 0" }}>
+            <b>Status:</b>{" "}
+            <select
+              value={r.status}
+              onChange={(e) => onUpdate(i, e.target.value)}
+              style={{
+                padding: "4px 8px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+              }}
+            >
+              <option>Pending</option>
+              <option>In Progress</option>
+              <option>Resolved</option>
+            </select>
+          </p>
+
+          <p
             style={{
-              border: "1px solid #ccc",
-              borderRadius: "10px",
-              padding: "0px",
-              paddingLeft: "5px",
-              margin: "5px",
-              boxShadow: "5px 5px 5px  rgba(110, 110, 110, 0.5)",
-              textWrap: "wrap",
-              boxSizing: "border-box",
+              fontSize: "12px",
+              opacity: 0.6,
+              textAlign: "right",
+              margin: 0,
             }}
           >
-            <p style={{ margin: "1px" }}>
-              <b>Name</b> - {r.name}
-            </p>
-            <p
-              style={{
-                margin: "1px",
-                textWrap: "wrap",
-                boxSizing: "border-box",
-                wordBreak: "break-word",
-              }}
-            >
-              <b>{r.issueType}</b> - {r.description}
-            </p>
-            <p
-              style={{
-                marginBottom: "5px",
-                marginLeft: "1px",
-                marginTop: "1px",
-              }}
-            >
-              Status:{" "}
-              <select
-                value={r.status}
-                onChange={(e) => onUpdate(i, e.target.value)}
-              >
-                <option>Pending</option>
-                <option>In Progress</option>
-                <option>Resolved</option>
-              </select>
-            </p>
-            <p
-              style={{
-                opacity: "0.5",
-                marginLeft: "1px",
-                marginTop: "1px",
-                textAlign: "right",
-              }}
-            >
-              {r?.timestamp}
-            </p>
-          </div>
-        ))}
-      </div>
-    </Card>
+            {r?.timestamp}
+          </p>
+        </div>
+      ))}
+    </div>
   );
 };
 

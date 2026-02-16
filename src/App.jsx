@@ -5,8 +5,9 @@ import ReportList from "./components/ReportList";
 import AdminDashboard from "./components/AdminDashboard";
 import AnalyticsPanel from "./components/AnalyticsPanel";
 import { getReports, saveReports } from "./utils/storage";
-import { Col, Row, message, Input, Button, Card } from "antd";
+import { Col, Row, message, Input, Button, Card, Tag } from "antd";
 import loginImage from "./assets/login.jpeg";
+
 function App() {
   const [reports, setReports] = useState(getReports());
   const [selectedCoords, setSelectedCoords] = useState(null);
@@ -18,16 +19,14 @@ function App() {
   const [messageApi, contextHolder] = message.useMessage();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const handleMapClick = (lng, lat) => {
     setSelectedCoords({ lng, lat });
   };
-  // useEffect(() => {
-  //   const storedReports = getReports();
-  //   setReports(storedReports);
-  // }, []);
+
   const addReport = (data) => {
     if (!selectedCoords) {
-      alert("click a location on the map first!");
+      messageApi.warning("Click a location on the map first!");
       return;
     }
 
@@ -41,10 +40,7 @@ function App() {
     const updated = [...reports, newReport];
     setReports(updated);
     saveReports(updated);
-    messageApi.open({
-      type: "success",
-      content: "report submitted successfully!",
-    });
+    messageApi.success("Report submitted successfully!");
   };
 
   const updateStatus = (index, newStatus) => {
@@ -64,7 +60,7 @@ function App() {
       setUser(adminUser);
       localStorage.setItem("loggedUser", JSON.stringify(adminUser));
       messageApi.success("Welcome, Admin!");
-    } else if (username.trim() && password === "lakshita123") {
+    } else if (username.trim() && password === "lakshita@123") {
       const normalUser = { role: "user", name: username };
       setUser(normalUser);
       localStorage.setItem("loggedUser", JSON.stringify(normalUser));
@@ -77,159 +73,249 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem("loggedUser");
-    messageApi.info("logged out successfully");
+    messageApi.info("Logged out successfully");
   };
 
-  if (!user) {
-    return (
-      <div
+  /* ---------------- LOGIN VIEW ---------------- */
+
+ if (!user) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        height: "100vh",
+        width: "100vw",
+        justifyContent: "center",
+        alignItems: "center",
+        background: `
+          linear-gradient(
+            135deg,
+            rgba(27, 67, 50, 0.85),
+            rgba(45, 106, 79, 0.75)
+          ),
+          url(${loginImage})
+        `,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        fontFamily: "Poppins, sans-serif",
+      }}
+    >
+      {contextHolder}
+
+      <Card
         style={{
-          display: "flex",
-          height: "100vh",
-          width: "100vw",
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundImage: `url(${loginImage})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
+          width: 430,
+          padding: "40px 35px",
+          borderRadius: "24px",
+          backdropFilter: "blur(20px)",
+          background: "rgba(255,255,255,0.95)",
+          boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+          border: "1px solid rgba(255,255,255,0.4)",
+          transition: "0.3s ease",
         }}
+        hoverable
       >
-        {" "}
-        {contextHolder}
-        <Card
-          style={{
-            width: 450,
-            padding: "20px",
-            textAlign: "center",
-            boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-            borderRadius: 10,
-          }}
-        >
-          <h2>♻️ Smart Waste Management</h2>
-          <p style={{ marginBottom: "20px", color: "#555" }}>
-            Please log in to continue
-          </p>
-
-          <Input
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{ marginBottom: "10px" }}
-          />
-          <Input.Password
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{ marginBottom: "15px" }}
-          />
-
-          <Button
-            type="primary"
-            block
-            onClick={handleLogin}
+        {/* Logo Section */}
+        <div style={{ marginBottom: "25px" }}>
+          <h1
             style={{
-              background: "#4caf50",
-              border: "none",
+              color: "#1b4332",
+              marginBottom: "5px",
+              fontWeight: "700",
+              fontSize: "28px",
             }}
           >
-            Login
-          </Button>
-        </Card>
-      </div>
-    );
-  }
+            ♻ Smart Waste
+          </h1>
+
+          <p
+            style={{
+              color: "#555",
+              fontSize: "14px",
+              letterSpacing: "1px",
+            }}
+          >
+            Smart Management Portal
+          </p>
+        </div>
+
+        {/* Inputs */}
+        <Input
+          size="large"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          style={{
+            marginBottom: "18px",
+            borderRadius: "12px",
+            height: "45px",
+          }}
+        />
+
+        <Input.Password
+          size="large"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={{
+            marginBottom: "25px",
+            borderRadius: "12px",
+            height: "45px",
+          }}
+        />
+
+        {/* Button */}
+        <Button
+          type="primary"
+          size="large"
+          block
+          onClick={handleLogin}
+          style={{
+            background: "linear-gradient(135deg, #2d6a4f, #40916c)",
+            border: "none",
+            borderRadius: "12px",
+            height: "48px",
+            fontWeight: "600",
+            fontSize: "15px",
+            boxShadow: "0 10px 25px rgba(45,106,79,0.4)",
+            transition: "0.3s ease",
+          }}
+        >
+          Login
+        </Button>
+
+        {/* Footer */}
+        <div
+          style={{
+            marginTop: "25px",
+            fontSize: "12px",
+            color: "#888",
+          }}
+        >
+          © 2026 Smart Waste System
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+
+  /* ---------------- MAIN APP ---------------- */
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
+    <div
+      style={{
+        minHeight: "90vh",
+        minWidth:"97vw",
+        background: "linear-gradient(135deg, #e8f5e9, #f1f8f4)",
+        paddingBottom: "40px",
+      }}
+    >
       {contextHolder}
+
+      {/* HEADER */}
       <div
         style={{
+          padding: "20px 40px",
+          background: "#ffffffcc",
+          backdropFilter: "blur(8px)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
         }}
       >
-        <h2>♻️ Smart Waste Management System</h2>
-        <div>
-          <span style={{ marginRight: "10px" }}>
-            Logged in as <strong>{user.name}</strong> ({user.role})
+        <h2 style={{ margin: 0, color: "#1b4332" }}>
+          ♻️ smart waste App
+        </h2>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+          <Tag color="green">{user.role.toUpperCase()}</Tag>
+          <span>
+            Welcome, <strong>{user.name}</strong>
           </span>
-          <Button size="small" danger onClick={handleLogout}>
+          <Button danger onClick={handleLogout}>
             Logout
           </Button>
         </div>
       </div>
 
-      <div style={{ marginBottom: "10px" }}>
-        {user.role === "admin" && (
-          <>
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("admin")}
-            >
-              Admin View
-            </button>{" "}
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("analytics")}
-            >
-              Analytics View
-            </button>{" "}
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("reports")}
-            >
-              Reports View
-            </button>{" "}
-          </>
-        )}
-        {user.role === "user" && (
-          <>
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("user")}
-            >
-              User View
-            </button>
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("analytics")}
-            >
-              Analytics View
-            </button>{" "}
-            <button
-              style={{ border: "1px solid #a1a1a1" }}
-              onClick={() => setView("reports")}
-            >
-              Reports View
-            </button>{" "}
-          </>
-        )}
+      {/* NAVIGATION */}
+      <div style={{ textAlign: "center", margin: "30px 0" }}>
+        {(user.role === "admin"
+          ? ["admin", "analytics", "reports"]
+          : ["user", "analytics", "reports"]
+        ).map((tab) => (
+          <Button
+            key={tab}
+            type={view === tab ? "primary" : "default"}
+            onClick={() => setView(tab)}
+            style={{
+              margin: "0 10px",
+              borderRadius: "20px",
+              padding: "0 25px",
+              backgroundColor: view === tab ? "#2d6a4f" : "",
+              borderColor: "#2d6a4f",
+              color: view === tab ? "#fff" : "#2d6a4f",
+              fontWeight: "500",
+            }}
+          >
+            {tab}
+          </Button>
+        ))}
       </div>
 
-      <div style={{ width: "95vw" }}>
-        <Row>
-          <Col md={16}>
-            <MapView
-              reports={reports}
-              onMapClick={view === "user" ? handleMapClick : null}
-            />
+      {/* MAIN GRID */}
+      <div style={{ padding: "0 40px" }}>
+        <Row gutter={[24, 24]}>
+          <Col xs={24} lg={16}>
+            <Card
+              style={{
+                borderRadius: "20px",
+                overflow: "hidden",
+                height: "600px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+              }}
+            >
+              <MapView
+                reports={reports}
+                onMapClick={view === "user" ? handleMapClick : null}
+              />
+            </Card>
           </Col>
-          <Col md={8}>
-            {view === "admin" && (
-              <AdminDashboard reports={reports} onUpdate={updateStatus} />
-            )}
-            {view === "user" && <ReportForm onSubmit={addReport} />}
-            {view === "analytics" && <AnalyticsPanel reports={reports} />}
-            {view === "reports" && <ReportList reports={reports} />}
+
+          <Col xs={24} lg={8}>
+            <Card
+              style={{
+                borderRadius: "20px",
+                height: "600px",
+                overflowY: "auto",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.05)",
+              }}
+            >
+              {view === "admin" && (
+                <AdminDashboard reports={reports} onUpdate={updateStatus} />
+              )}
+              {view === "user" && <ReportForm onSubmit={addReport} />}
+              {view === "analytics" && (
+                <AnalyticsPanel reports={reports} />
+              )}
+              {view === "reports" && <ReportList reports={reports} />}
+            </Card>
           </Col>
         </Row>
       </div>
+
+      {/* FOOTER */}
       <div
-        style={{ position: "relative", textAlign: "center", marginTop: "20px" }}
+        style={{
+          marginTop: "60px",
+          textAlign: "center",
+          color: "#666",
+          fontWeight: "500",
+        }}
       >
-        Made with ❤️ by Lakshita pandey
+        Made with 💚 by Lakshita Pandey
       </div>
     </div>
   );

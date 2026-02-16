@@ -1,71 +1,70 @@
-import { Card } from "antd";
 import React from "react";
+import { Tag } from "antd";
 
-const ReportList = ({ reports }) => (
-  <Card
-    title={"Submitted Reports"}
-    style={{ height: "80vh", overflow: "scroll" }}
-  >
-    <div
-      style={{
-        textAlign: "left",
-        padding: "20px",
-        textWrap: "wrap",
-        boxSizing: "border-box",
-      }}
-    >
-      {reports.map((r, i) => (
-        <div
-          key={i}
-          style={{
-            border: "1px solid #ccc",
-            borderRadius: "10px",
-            paddingLeft: "10px",
-            padding: "0px",
-            margin: "5px",
-            boxShadow: "5px 5px 5px  rgba(110, 110, 110, 0.5)",
-            textWrap: "wrap",
-            boxSizing: "border-box",
-            backgroundColor:
-              r?.status === "Resolved"
-                ? "#98ca98"
-                : r?.status === "Pending"
-                ? "#ff9a9a"
-                : "#ffdd9f",
-          }}
-        >
-          <p style={{ margin: "1px" }}>
-            <b>Name</b> - {r.name}
-          </p>
-          <p
+const ReportList = ({ reports }) => {
+  return (
+    <div style={{ padding: "10px" }}>
+      <h3 style={{ marginBottom: "15px", color: "#1b4332" }}>
+        📋 Submitted Reports
+      </h3>
+
+      {reports.length === 0 && (
+        <p style={{ color: "#888" }}>No reports available.</p>
+      )}
+
+      {reports.map((r, i) => {
+        const getStatusColor = () => {
+          if (r.status === "Resolved") return "green";
+          if (r.status === "Pending") return "red";
+          return "orange";
+        };
+
+        return (
+          <div
+            key={i}
             style={{
-              margin: "1px",
-              textWrap: "wrap",
-              boxSizing: "border-box",
-              wordBreak: "break-word",
+              borderRadius: "16px",
+              padding: "15px",
+              marginBottom: "15px",
+              background: "#ffffff",
+              boxShadow: "0 6px 20px rgba(0,0,0,0.05)",
+              transition: "0.3s ease",
+              border: "1px solid #f0f0f0",
             }}
           >
-            <b>{r.issueType}</b> - {r.description}
-          </p>
-          <p
-            style={{ marginBottom: "5px", marginLeft: "1px", marginTop: "1px" }}
-          >
-            <b>Status:</b> {r.status}
-          </p>
-          <p
-            style={{
-              opacity: "0.5",
-              marginLeft: "1px",
-              marginTop: "1px",
-              textAlign: "right",
-            }}
-          >
-            {r?.timestamp}
-          </p>
-        </div>
-      ))}
+            <p style={{ margin: "4px 0" }}>
+              <strong>Name:</strong> {r.name}
+            </p>
+
+            <p
+              style={{
+                margin: "6px 0",
+                wordBreak: "break-word",
+                color: "#555",
+              }}
+            >
+              <strong>{r.issueType}:</strong> {r.description}
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginTop: "10px",
+              }}
+            >
+              <Tag color={getStatusColor()}>{r.status}</Tag>
+
+              <span style={{ fontSize: "12px", opacity: 0.6 }}>
+                {r?.timestamp}
+              </span>
+            </div>
+          </div>
+        );
+      })}
     </div>
-  </Card>
-);
+  );
+};
 
 export default ReportList;
